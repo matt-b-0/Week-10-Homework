@@ -1,0 +1,81 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "South Australia Crime by Suburb (Calendar Year)",
+  "width": 900,
+  "height": 700,
+  "projection": {"type": "mercator"},
+  "params": [
+    {
+      "name": "Year",
+      "value": 2018,
+      "bind": {"input": "range", "min": 2011, "max": 2022, "step": 1}
+    }
+  ],
+  "layer": [
+    /* Base layer: all suburbs in grey with 'no data' tooltip.
+       The colored overlay (next layer) will sit on top where data exists. */
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/matt-b-0/Week-10-Homework/refs/heads/main/json/Suburbs_GDA2020.geojson",
+        "format": {"type": "geojson"}
+      },
+      "transform": [
+        {"calculate": "toLower(datum.properties.suburb)", "as": "gj_key"},
+        {
+          "calculate": "'data is not available in \\'' + datum.properties.suburb + \"'\"",
+          "as": "no_data_tip"
+        }
+        /* If you want to focus on metropolitan Adelaide only,
+           uncomment this filter (rough postcode band):
+        ,{"filter":"toNumber(datum.properties.postcode) >= 5000 && toNumber(datum.properties.postcode) <= 5199"}
+        */
+      ],
+      "mark": {"type": "geoshape", "stroke": "white", "strokeWidth": 0.2},
+      "encoding": {
+        "color": {"value": "#e0e0e0"},
+        "tooltip": [{"field": "no_data_tip", "type": "nominal", "title": ""}]
+      }
+    },
+
+    /* Overlay: suburbs that have data for the selected Year.
+       We look up the CSV filtered to that year and color by crime_count. */
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/matt-b-0/Week-10-Homework/refs/heads/main/json/Suburbs_GDA2020.geojson",
+        "format": {"type": "geojson"}
+      },
+      "transform": [
+        {"calculate": "toLower(datum.properties.suburb)", "as": "gj_key"},
+        {
+          "lookup": "gj_key",
+          "from": {
+            "data": {
+              "url": "https://raw.githubusercontent.com/matt-b-0/Week-10-Homework/refs/heads/main/Data/Week10CSV.csv"
+            },
+            "transform": [
+              {"filter": "datum.year == Year"},
+              {"calculate": "toLower(datum.suburb)", "as": "csv_key"}
+            ],
+            "key": "csv_key",
+            "fields": ["crime_count", "year", "suburb"]
+          }
+        },
+        {"filter": "isValid(datum.crime_count) && datum.crime_count > 0"}
+      ],
+      "mark": {"type": "geoshape", "stroke": "white", "strokeWidth": 0.2},
+      "encoding": {
+        "color": {
+          "field": "crime_count",
+          "type": "quantitative",
+          "title": "Crimes",
+          "scale": {"scheme": "reds"}
+        },
+        "tooltip": [
+          {"field": "suburb", "type": "nominal", "title": "Suburb"},
+          {"field": "crime_count", "type": "quantitative", "title": "Number of crimes"},
+          {"field": "year", "type": "nominal", "title": "Year"}
+        ]
+      }
+    }
+  ]
+}
