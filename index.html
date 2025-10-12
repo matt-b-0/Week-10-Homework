@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>South Australia Crime — Vega-Lite</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Vega / Vega-Lite / Vega-Embed (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5.30.0" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.20.1" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0" defer></script>
+
+  <!-- Optional: your site styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <style>
+    /* Simple responsive container */
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+    .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.25rem; margin: 0 0 1rem; }
+    #viz { min-height: 500px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>South Australia Crime — Interactive Map & Top 5 Suburbs</h1>
+    <div id="viz"></div>
+  </div>
+
+  <script>
+    // 👉 Replace this with the raw URL to your Vega-Lite JSON spec in your repo
+    // For example:
+    // const specUrl = "https://raw.githubusercontent.com/matt-b-0/Week-10-Homework/main/json/sa_crime_map_and_top5.vl.json";
+    const specUrl = "https://raw.githubusercontent.com/matt-b-0/Week-10-Homework/main/JSON/WK10HW.json";
+
+    // Wait for the libraries to load (since we used 'defer')
+    window.addEventListener('DOMContentLoaded', () => {
+      vegaEmbed('#viz', specUrl, {
+        actions: { export: true, source: true, compiled: false, editor: true }, // toolbar options
+        renderer: 'canvas' // 'svg' also works; 'canvas' is faster for big maps
+      }).then(res => {
+        // You can access the Vega View instance via res.view if needed:
+        // res.view.addSignalListener('Year', (name, value) => console.log('Year changed to', value));
+      }).catch(err => {
+        console.error('Vega-Embed error:', err);
+        document.querySelector('#viz').innerHTML = "<p>Failed to load visualization. Check the spec URL and CORS.</p>";
+      });
+    });
+  </script>
+</body>
+</html>
